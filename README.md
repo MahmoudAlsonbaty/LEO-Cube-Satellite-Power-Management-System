@@ -64,6 +64,3 @@ We designed this system to be highly transparent. The jury can reproduce and ver
    This script generates the analytical models based on our 100-minute orbit, visually showcasing the massive energy savings achieved during the 30-minute eclipse cutoff. Cross-reference these findings with `results/Power Budget.xlsx`.
 2. **Review the Hardware Integration:** Open `hardware/Aether_Avionics.pdsprj` using Proteus. Here, you can visually inspect the schematic, observe the MOSFET placement, and verify exactly how the sensors are gated from the main power rail.
 3. **Audit the Firmware:** Open `src/ESP32 Firmware.cpp` in your IDE. Review the bare-metal logic dictating how the ESP32 manages its 60-second wake-up cycle, checks the 120°C thermal limit, and actively controls the MOSFET gate to drop peripheral power.
-
-##  AI Usage Disclosure
-To stay focused on core engineering, AI tools were utilized strictly for code optimization suggestions and drafting documentation. All generated outputs have been thoroughly tested, validated, and are fully understood and defensible by our team. 
