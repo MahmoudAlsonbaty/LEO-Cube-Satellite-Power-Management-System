@@ -1,4 +1,4 @@
-# LEO Cube Satellite Power Management System 🛰️⚡
+# LEO Cube Satellite Power Management System 
 
 <p align="center">
   <img src="docs/cubesat.png" alt="LEO CubeSat" width="250"/>
