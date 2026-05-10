@@ -30,6 +30,7 @@ If our LM35 sensor detects that the subsystem temperature has reached a critical
 ##  Project Architecture
 <pre>
 ├── README.md                                 # Project overview and instructions
+├──.gitignore
 ├── LICENSE                                   # Project license
 ├── /docs
 │   ├── cubesat.png                           # CubeSat visual placeholder
