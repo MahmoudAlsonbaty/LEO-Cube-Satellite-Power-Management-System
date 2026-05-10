@@ -38,8 +38,6 @@ If our LM35 sensor detects that the subsystem temperature has reached a critical
 │   └── System Block Diagram.png              # High-level architecture overview
 ├── /hardware
 │   ├── Aether_Avionics.pdsprj                # Proteus Design Suite interactive schematic
-│   ├── Backup Of Aether_Avionics.pdsbak      # Proteus backup file
-│   └── Last Loaded Aether_Avionics.pdsbak    # Proteus backup file
 ├── /results
 │   └── Power Budget.xlsx                     # Detailed numerical energy calculations
 ├── /simulation
