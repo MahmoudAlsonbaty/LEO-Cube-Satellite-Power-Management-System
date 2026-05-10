@@ -7,9 +7,9 @@
 **AESS Sustainability Hackathon 2026 | Challenge 1: Sustainable Electronics**
 
 ##  The Mission: Albedo Weather Monitoring
-Welcome to the future of energy-efficient space exploration! This repository houses the firmware, schematics, and technical documentation for a **CubeSat Albedo Weather Satellite** sensing node. 
+Welcome to the future of energy-efficient space exploration. This repository houses the firmware, schematics, and technical documentation for a **CubeSat Albedo Weather Satellite** sensing node. 
 
-Our primary mission is to measure Earth's albedo (solar reflectance). However, conventional satellites often waste massive amounts of energy running "always-on" architectures even when there is no sunlight to measure. We built this subsystem to completely eliminate that waste.
+Our primary mission is to measure Earth's albedo (solar reflectance). However, conventional satellites often waste massive amounts of energy running "always-on" architectures—even when there is no sunlight to measure. We built this subsystem to completely eliminate that waste.
 
 ##  The Core Concept: Eclipse-Aware Power Gating
 Our strategy relies on ruthless, **hardware-level power gating** tied directly to the satellite's orbital mechanics. 
@@ -28,10 +28,42 @@ If our LM35 sensor detects that the subsystem temperature has reached a critical
 * **The Gatekeeper:** N-Channel MOSFET (Active power cutoff during eclipse and thermal events)
 
 ##  Project Architecture
-```text
-├── README.md        # Project overview, tools, and instructions
-├── /docs            # Diagrams, design notes, and power budgets
-├── /src             # ESP32 C/C++ firmware and power-gating logic
-├── /simulation      # Power analytical calculations (100-min orbit models)
-├── /results         # Baseline vs. optimized power plots
-└── /hardware        # Schematics, PCB files, and wiring diagrams
+<pre>
+├── README.md                                 # Project overview and instructions
+├── LICENSE                                   # Project license
+├── /docs
+│   ├── cubesat.png                           # CubeSat visual placeholder
+│   ├── LEO_Satellite_Power_Simulation.png    # Rendered output of power savings
+│   ├── Schematic Capture.png                 # Image of the subsystem wiring
+│   └── System Block Diagram.png              # High-level architecture overview
+├── /hardware
+│   ├── Aether_Avionics.pdsprj                # Proteus Design Suite interactive schematic
+│   ├── Backup Of Aether_Avionics.pdsbak      # Proteus backup file
+│   └── Last Loaded Aether_Avionics.pdsbak    # Proteus backup file
+├── /results
+│   └── Power Budget.xlsx                     # Detailed numerical energy calculations
+├── /simulation
+│   └── Power Consumption Comparision.py      # Python model for the 100-minute orbit
+└── /src
+    └── ESP32 Firmware.cpp                    # ESP32 C/C++ firmware and power-gating logic
+    </pre>
+
+##  Prerequisites & Software Requirements
+To fully review, simulate, and compile the files in this repository, you will need the following tools installed:
+
+* **Python 3.x:** Required to run the orbit simulation script. Ensure you have standard data visualization libraries installed (e.g., `pip install matplotlib numpy pandas`).
+* **Proteus Design Suite (v8.x or newer):** Required to open, interact with, and simulate the `.pdsprj` hardware schematic.
+* **Arduino IDE or PlatformIO:** Required to view and compile the `.cpp` firmware. You must have the **ESP32 Board Package** installed via the Boards Manager.
+* **Microsoft Excel, Google Sheets, or LibreOffice Calc:** Required to open and verify the `.xlsx` power budget breakdown.
+
+##  How to Run the Project & Verify Results
+We designed this system to be highly transparent. The jury can reproduce and verify our power and thermal savings by following these steps:
+
+1. **Simulate the Orbit (Power Budget):** Open your terminal, navigate to the repository root, and run:
+   `python "simulation/Power Consumption Comparision.py"`
+   This script generates the analytical models based on our 100-minute orbit, visually showcasing the massive energy savings achieved during the 30-minute eclipse cutoff. Cross-reference these findings with `results/Power Budget.xlsx`.
+2. **Review the Hardware Integration:** Open `hardware/Aether_Avionics.pdsprj` using Proteus. Here, you can visually inspect the schematic, observe the MOSFET placement, and verify exactly how the sensors are gated from the main power rail.
+3. **Audit the Firmware:** Open `src/ESP32 Firmware.cpp` in your IDE. Review the bare-metal logic dictating how the ESP32 manages its 60-second wake-up cycle, checks the 120°C thermal limit, and actively controls the MOSFET gate to drop peripheral power.
+
+##  AI Usage Disclosure
+To stay focused on core engineering, AI tools were utilized strictly for code optimization suggestions and drafting documentation. All generated outputs have been thoroughly tested, validated, and are fully understood and defensible by our team. 
