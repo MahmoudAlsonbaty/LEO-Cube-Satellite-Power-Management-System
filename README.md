@@ -9,7 +9,7 @@
 ##  The Mission: Albedo Weather Monitoring
 Welcome to the future of energy-efficient space exploration! This repository houses the firmware, schematics, and technical documentation for a **CubeSat Albedo Weather Satellite** sensing node. 
 
-Our primary mission is to measure Earth's albedo (solar reflectance). However, conventional satellites often waste massive amounts of energy running "always-on" architectures—even when there is no sunlight to measure. We built this subsystem to completely eliminate that waste.
+Our primary mission is to measure Earth's albedo (solar reflectance). However, conventional satellites often waste massive amounts of energy running "always-on" architectures even when there is no sunlight to measure. We built this subsystem to completely eliminate that waste.
 
 ##  The Core Concept: Eclipse-Aware Power Gating
 Our strategy relies on ruthless, **hardware-level power gating** tied directly to the satellite's orbital mechanics. 
