@@ -25,7 +25,7 @@ If our LM35 sensor detects that the subsystem temperature has reached a critical
 ##  The Hardware Stack
 * **The Brain:** ESP32 (Executing the 60-second deep-sleep polling cycle)
 * **The Senses:** LM35 (Thermal limit monitor) & VEML7700 (High-accuracy ambient light/albedo sensor)
-* **The Gatekeeper:** N-Channel MOSFET (Active power cutoff during eclipse and thermal events)
+* **The Gatekeeper:** P-Channel MOSFET (Active power cutoff during eclipse and thermal events)
 
 ##  Project Architecture
 <pre>
@@ -36,6 +36,7 @@ If our LM35 sensor detects that the subsystem temperature has reached a critical
 │   ├── cubesat.png                           # CubeSat visual placeholder
 │   ├── LEO_Satellite_Power_Simulation.png    # Rendered output of power savings
 │   ├── Schematic Capture.png                 # Image of the subsystem wiring
+│   ├── IEEE-AESH-Hackathon-Sustainability-In-Space.pdf
 │   └── System Block Diagram.png              # High-level architecture overview
 ├── /hardware
 │   ├── Aether_Avionics.pdsprj                # Proteus Design Suite interactive schematic
