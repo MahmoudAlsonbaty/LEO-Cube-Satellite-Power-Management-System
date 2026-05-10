@@ -37,6 +37,7 @@ If our LM35 sensor detects that the subsystem temperature has reached a critical
 │   ├── LEO_Satellite_Power_Simulation.png    # Rendered output of power savings
 │   ├── Schematic Capture.png                 # Image of the subsystem wiring
 │   ├── IEEE-AESH-Hackathon-Sustainability-In-Space.pdf
+│   ├── AESH Aether Avionics Presentation.pdf
 │   └── System Block Diagram.png              # High-level architecture overview
 ├── /hardware
 │   ├── Aether_Avionics.pdsprj                # Proteus Design Suite interactive schematic
