@@ -48,7 +48,7 @@ tau = 20.0 # thermal time constant (minutes)
 curr_temp = 25.0 # Initial temp
 
 # Power Consumption Estimates (mA)
-baseline_power = np.full_like(time, 500.0, dtype=float)
+baseline_power = np.full_like(time, 40.0086, dtype=float)
 improved_power = np.zeros_like(time, dtype=float)
 
 overheat_threshold = 95 # degrees C, more realistic limit
@@ -64,7 +64,7 @@ for i in range(len(time)):
 
     # 2. Power and Protection Logic
     if illumination[i] < 0.1: # Deep eclipse
-        improved_power[i] = 50.0 # Deep sleep during eclipse
+        improved_power[i] = 0.0111 # Deep sleep during eclipse
         overheat_timer = 0 
         is_overheated = False 
     else:
@@ -78,9 +78,9 @@ for i in range(len(time)):
             is_overheated = True
             
         if is_overheated:
-            improved_power[i] = 50.0 # Deep sleep due to overheating
+            improved_power[i] = 0.0111 # Deep sleep due to overheating
         else:
-            improved_power[i] = 500.0 # Normal operation
+            improved_power[i] = 40.0086 # Normal operation
 
 # --- 3. Calculate Final Statistics ---
 baseline_energy = np.trapezoid(baseline_power, time)
@@ -160,9 +160,9 @@ ax_temp.set_ylabel("Temperature (°C)")
 ax_temp.legend(loc="upper right")
 ax_temp.grid(True, alpha=0.5)
 
-line_base_power, = ax_pow.plot([], [], color='#757575', linestyle='--', linewidth=2, label="Baseline (500mA)")
+line_base_power, = ax_pow.plot([], [], color='#757575', linestyle='--', linewidth=2, label="Baseline (~40mA)")
 line_imp_power, = ax_pow.plot([], [], color='#43A047', linewidth=2, label="Improved (Smart Sleep)")
-ax_pow.set_ylim(-50, 600) 
+ax_pow.set_ylim(-5, 60) 
 ax_pow.set_xlabel("Time (Minutes)")
 ax_pow.set_ylabel("Power (mA)")
 ax_pow.legend(loc="upper right")
