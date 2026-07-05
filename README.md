@@ -1,7 +1,7 @@
 # Aether-Albedo-1 CubeSat Power Management System
 
 <p align="center">
-  <img src="docs/System Block Diagram.png" alt="Aether-Albedo-1 system block diagram" width="650"/>
+  <img src="docs/cubesat.png" alt="Cubesat image" width="650"/>
 </p>
 
 **IEEE AESS Sustainability Hackathon 2026 | Challenge 1: Sustainable Electronics for Space Systems**
