@@ -2,7 +2,6 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
 #include <math.h>
- // Ensure Velxio supports this specific Adafruit library
 
 // --- Pin Definitions ---
 #define PHOTO_SENSOR_PIN 34  
@@ -31,11 +30,10 @@ float getLUX(int rawADC) {
 }
 
 // === Helper Function: Handle Sleep State ===
-// === Helper Function: Handle Sleep State (SIMULATION VERSION) ===
 void enterDeepSleep(const char* logMessage) {
   Serial.println(logMessage);
   
-  // Cut ground to all sensors (if you re-add the MOSFET later)
+  // Cut ground to all sensors 
   digitalWrite(MOSFET_PIN, HIGH); 
   
   Serial.println("Entering SIMULATED Deep Sleep for 5 Seconds...");
@@ -44,7 +42,7 @@ void enterDeepSleep(const char* logMessage) {
   // 1. Wait the 5 seconds using standard delay (which the simulator supports)
   delay(SLEEP_SECONDS * 1000);
   
-  // 2. Force a software reboot to mimic waking up from deep sleep!
+  // 2. Force a software reboot to mimic waking up from deep sleep
   ESP.restart(); 
 }
 
@@ -61,7 +59,6 @@ void setup() {
   // 1. Power Peripherals
   digitalWrite(MOSFET_PIN, LOW);
   
-  // Keep the 500ms delay to allow Velxio's SPICE engine to resolve the MOSFET ground
   delay(500); 
   
   // 2. Initialize BMP I2C Sensor
@@ -69,7 +66,6 @@ void setup() {
     Serial.println("WARNING: Could not find a valid BMP sensor, check wiring!");
   }
   
-  // Dummy read to clear ESP32 ADC buffer quirks in simulation
   analogRead(PHOTO_SENSOR_PIN); 
   delay(20);
   
@@ -80,8 +76,7 @@ void loop() {
   // 1. Read the raw light value
   int photoRaw = analogRead(PHOTO_SENSOR_PIN);
   
-  // DEBUG: Uncomment this if you need to see exactly what Velxio is feeding the pin
-  // Serial.printf("DEBUG - Raw Light ADC Value: %d\n", photoRaw);
+  
 
   // 2. ECLIPSE CHECK -> Triggers Deep Sleep
   if (photoRaw < ECLIPSE_THRESHOLD) {
@@ -104,7 +99,5 @@ void loop() {
   Serial.printf("Temp: %.1f C | Light: %.1f Lux\n", tempC, lux);
   
   // 6. Sampling Rate
-  // This is a standard pause. The ESP32 stays awake, sensors stay on.
-  // Set to 1000ms (1 second) for responsive output, change if needed.
   delay(1000); 
 }
