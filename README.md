@@ -105,8 +105,7 @@ To load the simulation into your Velxio workspace:
 ## Parameters and Configurations
 * **Orbit Duration:** 100 minutes.
 * **Eclipse Duration:** ~30 minutes (roughly a quarter of the orbit).
-* **Thermal Cut-off Threshold:** 120°C.
-* **Deep Sleep Wake-up Heartbeat:** 60 seconds (microcontroller wakes up briefly to check for solar voltage).
+* **Thermal Cut-off Threshold:** 100°C.
 * **Power Savings Achieved:** 6% - 10% (relative to the Quetzal-1 baseline).
 * **AI Model Inputs:** Time to eclipse, eclipse duration, battery health, power from solar cells, and consumed power.
 * **AI Model States:** 
