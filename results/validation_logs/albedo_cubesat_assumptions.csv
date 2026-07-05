@@ -1,0 +1,9 @@
+parameter,value,source_or_basis,confidence,note
+Form factor,1U CubeSat,Quetzal-1 1U reference from supplied EPS flight-proven PDF,medium-high,"Used because the project concept is a compact albedo payload, not a high-power 3U/6U instrument."
+Battery capacity,14.8 Wh,"Quetzal-1: two 3.7 V, 2000 mAh Li-ion polymer cells in parallel",high for baseline transfer,Kept equal to the 1U flight reference for a conservative battery comparison.
+Solar input,2.37 W,Existing Quetzal-1 transferred solar-generation assumption in project benchmark,medium,"Appropriate for a 1U body-mounted-panel scale, but final value depends on panel layout and pointing."
+Heater-off bus load,0.66370 W,Quetzal-1 public heater-off spacecraft/EPS load,"high for reference, medium for transfer",Used as the no-logic bus burden so the comparison remains conservative.
+Albedo payload active load,0.123 W,Current project albedo payload load used in firmware benchmark,medium,"Represents a low-power visible/albedo sensing payload, not a high-power active instrument."
+Battery heater on-power,0.6735 W,75 percent of Quetzal-1 0.898 W heater; NASA SmallSat thermal-control guidance supports low heater power as plausible for low-mass SmallSats,medium assumption,This is the main hardware assumption and must be validated with thermal testing.
+Adaptive payload settings,"100% science, 95% scheduled, 35% power-save, 80% pre-eclipse",Cold payload schedule sweep preserving at least 95% data with meaningful cold-case energy savings,model-derived,"Payload is still shut off in eclipse, fault, thermal-safe, and low-SOC-safe modes."
+Adaptive heater settings,"20% low pulse, 35% strong pulse, 100% critical cold heater",Current firmware heater policy held constant during payload schedule tuning,model-derived,Charge remains inhibited below 0 C and above 45 C.
