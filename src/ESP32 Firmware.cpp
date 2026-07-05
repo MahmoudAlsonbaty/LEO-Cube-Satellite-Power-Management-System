@@ -1,144 +1,110 @@
-#include <math.h> 
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP280.h>
+#include <math.h>
+ // Ensure Velxio supports this specific Adafruit library
 
 // --- Pin Definitions ---
-#define SOLAR_SENSE_PIN  34  
-#define MOSFET_PIN       23  
-#define NTC_SENSOR_PIN   32  
-#define PHOTO_SENSOR_PIN 33  
+#define PHOTO_SENSOR_PIN 34  
+#define MOSFET_PIN       25  
 
 // --- Configuration ---
-#define ECLIPSE_THRESHOLD 500  
-#define SLEEP_SECONDS 5       
+#define ECLIPSE_THRESHOLD 500       
+#define SLEEP_SECONDS 5         
 #define uS_TO_S_FACTOR 1000000ULL 
 
-
-
 RTC_DATA_ATTR int bootCount = 0;
+Adafruit_BMP280 bmp; 
 
-// === Helper Function: Calculate True NTC Temperature ===
-float getTemperatureC(int adcValue) {
-
-  if (adcValue <= 620) return 125.0;
-  if (adcValue >= 4095) return -40.0;
-
-  float x1 = 620.0,  y1 = 125.0;  // Hot Endpoint
-  float x2 = 3102, y2 = 25.0;   // Middle Point (ADC Midpoint)
-  float x3 = 4095.0, y3 = -40.0;  // Cold Endpoint
+// === Helper Function: Calculate True LUX (Velxio 5V Hardware Bypass) ===
+float getLUX(int rawADC) {
+  // Prevent ADC glitches
+  if (rawADC < 0) rawADC = 0;
+  if (rawADC > 4095) rawADC = 4095;
   
-  float x = (float)adcValue;
+  // The ESP32 maxes out at 4095 (3.3V). 
+  // Because the simulator's sensor is scaled for 5V at 1000 Lux,
+  // 3.3V corresponds to exactly 660 Lux.
+  float lux = ((float)rawADC / 4095.0) * 660.0;
   
-  // Lagrange Polynomial Math
-  float term1 = y1 * ((x - x2) * (x - x3)) / ((x1 - x2) * (x1 - x3));
-  float term2 = y2 * ((x - x1) * (x - x3)) / ((x2 - x1) * (x2 - x3));
-  float term3 = y3 * ((x - x1) * (x - x2)) / ((x3 - x1) * (x3 - x2));
-
-  
-  return term1 + term2 + term3;
+  return lux;
 }
 
-float getLUX(int adcValue) {
-  // Cap the extremes to prevent simulator glitches
-  if (adcValue == 3102) return 500.0;
-
-
-  float x1 = 0,  y1 = 0;  // Hot Endpoint
-  float x2 = 3102, y2 = 500;   // Middle Point (ADC Midpoint)
-  float x3 = 4095.0, y3 = 1000;  // Cold Endpoint
+// === Helper Function: Handle Sleep State ===
+// === Helper Function: Handle Sleep State (SIMULATION VERSION) ===
+void enterDeepSleep(const char* logMessage) {
+  Serial.println(logMessage);
   
-  float x = (float)adcValue;
+  // Cut ground to all sensors (if you re-add the MOSFET later)
+  digitalWrite(MOSFET_PIN, HIGH); 
   
-  // Lagrange Polynomial Math
-  float term1 = y1 * ((x - x2) * (x - x3)) / ((x1 - x2) * (x1 - x3));
-  float term2 = y2 * ((x - x1) * (x - x3)) / ((x2 - x1) * (x2 - x3));
-  float term3 = y3 * ((x - x1) * (x - x2)) / ((x3 - x1) * (x3 - x2));
-
+  Serial.println("Entering SIMULATED Deep Sleep for 5 Seconds...");
+  Serial.flush(); 
   
-  return term1 + term2 + term3;
+  // 1. Wait the 5 seconds using standard delay (which the simulator supports)
+  delay(SLEEP_SECONDS * 1000);
+  
+  // 2. Force a software reboot to mimic waking up from deep sleep!
+  ESP.restart(); 
 }
 
 void setup() {
   Serial.begin(115200);
-  delay(3000); 
+  delay(1000); 
   
   bootCount++;
-  Serial.println("\n--- Albedo Node Boot ---");
+  Serial.printf("\n--- Albedo Node Boot (Wake Cycle: %d) ---\n", bootCount);
 
-  pinMode(SOLAR_SENSE_PIN, INPUT);
   pinMode(MOSFET_PIN, OUTPUT);
+  pinMode(PHOTO_SENSOR_PIN, INPUT);
   
-  int solarVoltage = analogRead(SOLAR_SENSE_PIN);
-
-  if (solarVoltage < ECLIPSE_THRESHOLD) {
-    Serial.println("Status: Eclipse detected. Cutting sensor ground.");
-    digitalWrite(MOSFET_PIN, LOW); 
-    // esp_sleep_enable_timer_wakeup(SLEEP_SECONDS * uS_TO_S_FACTOR);
-    // esp_deep_sleep_start();
-    delay(SLEEP_SECONDS * 1000);
-  } else {
-    Serial.println("Status: Daylight. Powering up sensors.");
-    digitalWrite(MOSFET_PIN, HIGH);
-    delay(100); 
-    
-    int ntcRaw = analogRead(NTC_SENSOR_PIN);
-    int photoRaw = analogRead(PHOTO_SENSOR_PIN);
-    
-    float tempC = getTemperatureC(ntcRaw);
-    
-    // --- THERMAL THROTTLE CHECK ---
-    if (tempC > 120.0) {
-      Serial.print("CRITICAL: Temp is "); Serial.print(tempC, 1); Serial.println(" C. Exceeds 120C limit!");
-      Serial.println("Action: Thermal Throttle Initiated. Cutting power and sleeping.");
-      digitalWrite(MOSFET_PIN, LOW);
-      
-      // esp_sleep_enable_timer_wakeup(SLEEP_SECONDS * uS_TO_S_FACTOR);
-      // esp_deep_sleep_start();
-      delay(SLEEP_SECONDS * 1000);
-      return; // Exit setup early so we don't process the rest
-    }
+  // 1. Power Peripherals
+  digitalWrite(MOSFET_PIN, LOW);
   
-    int lux = getLUX(photoRaw);
-    
-    Serial.print("Initial Temp: "); Serial.print(tempC, 1); Serial.println(" C");
-    Serial.print("Initial Light: "); Serial.print(lux); Serial.println(" Lux");
-    delay(2000); 
+  // Keep the 500ms delay to allow Velxio's SPICE engine to resolve the MOSFET ground
+  delay(500); 
+  
+  // 2. Initialize BMP I2C Sensor
+  if (!bmp.begin(0x77) && !bmp.begin(0x76)) {
+    Serial.println("WARNING: Could not find a valid BMP sensor, check wiring!");
   }
+  
+  // Dummy read to clear ESP32 ADC buffer quirks in simulation
+  analogRead(PHOTO_SENSOR_PIN); 
+  delay(20);
+  
+  Serial.println("System Initialized. Entering Active Monitoring Loop.");
 }
 
 void loop() {
-  int solarVoltage = analogRead(SOLAR_SENSE_PIN);
+  // 1. Read the raw light value
+  int photoRaw = analogRead(PHOTO_SENSOR_PIN);
   
-  if (solarVoltage < ECLIPSE_THRESHOLD) {
-    Serial.println("Transition: Entering Eclipse. Cutting power and sleeping.");
-    digitalWrite(MOSFET_PIN, LOW);
-    // esp_sleep_enable_timer_wakeup(SLEEP_SECONDS * uS_TO_S_FACTOR);
-    // esp_deep_sleep_start();
-    delay(SLEEP_SECONDS * 1000);
-  } else {
-    Serial.println("--- Active Sampling ---");
-    int ntcRaw = analogRead(NTC_SENSOR_PIN);
-    int photoRaw = analogRead(PHOTO_SENSOR_PIN);
-    
-    // Mathematical Conversion
-    float tempC = getTemperatureC(ntcRaw);
-    
-    // --- THERMAL THROTTLE CHECK ---
-    if (tempC > 120.0) {
-      Serial.print("CRITICAL: Temp is "); Serial.print(tempC, 1); Serial.println(" C. Exceeds 120C limit!");
-      Serial.println("Action: Thermal Throttle Initiated. Cutting power and sleeping.");
-      digitalWrite(MOSFET_PIN, LOW);
-      
-      // esp_sleep_enable_timer_wakeup(SLEEP_SECONDS * uS_TO_S_FACTOR);
-      // esp_deep_sleep_start();
-      delay(SLEEP_SECONDS * 1000);
-      return; // Skip the rest of the loop and start over after waking up
-    }
+  // DEBUG: Uncomment this if you need to see exactly what Velxio is feeding the pin
+  // Serial.printf("DEBUG - Raw Light ADC Value: %d\n", photoRaw);
 
-    int lux = map(photoRaw, 0, 4095, 0, 1000);
-    
-
-    Serial.print("Temp: "); Serial.print(tempC, 1); Serial.print(" C | ");
-    Serial.print("Light: "); Serial.print(getLUX(photoRaw)); Serial.println(" Lux");
-    
-    delay(1000); 
+  // 2. ECLIPSE CHECK -> Triggers Deep Sleep
+  if (photoRaw < ECLIPSE_THRESHOLD) {
+    enterDeepSleep("Status: Eclipse detected. Cutting power and sleeping.");
+    return; // Safety return, though esp_deep_sleep_start() prevents reaching here
+  } 
+  
+  // 3. Read Temperature 
+  float tempC = bmp.readTemperature(); 
+  
+  // 4. THERMAL THROTTLE CHECK -> Triggers Deep Sleep
+  if (tempC > 80.0) {
+    Serial.printf("CRITICAL: Temp is %.1f C. Exceeds 120C limit!\n", tempC);
+    enterDeepSleep("Action: Thermal Throttle Initiated. Cutting power and sleeping.");
+    return;
   }
+  
+  // 5. Active Daylight Output (Only reached if both checks pass)
+  float lux = getLUX(photoRaw);
+  Serial.printf("Temp: %.1f C | Light: %.1f Lux\n", tempC, lux);
+  
+  // 6. Sampling Rate
+  // This is a standard pause. The ESP32 stays awake, sensors stay on.
+  // Set to 1000ms (1 second) for responsive output, change if needed.
+  delay(1000); 
 }
