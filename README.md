@@ -18,9 +18,7 @@ These devices unlock infinite possibilities, forming the basis for Albedo missio
 Statistical research by NASA indicates that roughly **41% of small satellites experienced total or partial failure**, with battery issues being the primary culprit. Up to **50% of university-built CubeSats fail within the first six months** due to battery lifespan.
 
 ### The Eclipse Dilemma
-This satellite orbits the Earth every **100 minutes**. For around a quarter of every orbit (~30 minutes), it’s in complete darkness. The solar panels produce no power, but components are still consuming energy. This leads to battery degradation and power shortages, forcing missions to be terminated. Leaving systems on 24/7 is a simple oversight, yet a fatal flaw. For example, during the Quetzal-1 mission, this caused a battery failure that ended up cutting an ambitious 900-day mission into a brutal 200-day mission. 
-
-It didn’t have to end that soon. That’s why we introduce to you our **Low Earth Orbit CubeSat Power Management System**.
+This satellite orbits the Earth every **100 minutes**. For around a quarter of every orbit (~30 minutes), it’s in complete darkness. The solar panels produce no power, but components are still consuming energy. This leads to battery degradation and power shortages, forcing missions to be terminated. Leaving systems on 24/7 is a simple oversight, yet a fatal flaw. 
 
 ## Our Solution
 With this system, we ensure that energy isn't just power; it's time. Extending battery life doesn't just save energy; it extends the lifetime of the CubeSat. Our system conserves energy in two crucial ways:
