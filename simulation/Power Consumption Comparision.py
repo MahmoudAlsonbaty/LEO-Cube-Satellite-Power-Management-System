@@ -1,64 +1,90 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.patches import Circle, Polygon
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+import matplotlib.image as mpimg
 
-# --- 1. Simulation Parameters ---
-orbit_period = 100  # 100 minutes total per orbit
-eclipse_duration = 30 # 30 minutes in eclipse
-sunlit_duration = orbit_period - eclipse_duration # 70 minutes in sunlight
-total_time = 2 * orbit_period # Simulate 2 orbits (200 minutes)
+# --- 1. Simulation & Orbital Parameters ---
+R_earth = 6371.0 # km
+altitude = 2500.0 # km (Increased to make Earth look smaller proportionally)
+R_orbit = R_earth + altitude
+orbit_period = 92.5 # realistic period in minutes
+total_time = 2 * orbit_period # Simulate 2 orbits
+time = np.arange(0, total_time + 1, 1) # 1 minute resolution
 
-time = np.arange(0, total_time + 1, 1)
+# Calculate Angle over time (Sun is in +X direction, so angle 0 is facing the sun)
+# Let's start the orbit at the sunlit side (angle 0)
+angle = (time / orbit_period) * 2 * np.pi
+sat_x = R_orbit * np.cos(angle)
+sat_y = R_orbit * np.sin(angle)
 
-# --- 2. Pre-calculate the Environment & Data ---
-is_eclipse = (time % orbit_period) >= sunlit_duration
+# Illumination Model with Penumbra
+# Sun is at +X. The shadow (Umbra) is basically y in [-R_earth, R_earth] and x < 0.
+# Penumbra is a small transition zone.
+illumination = np.zeros_like(time, dtype=float)
+for i in range(len(time)):
+    x, y = sat_x[i], sat_y[i]
+    if x >= 0:
+        # Sunlit side
+        illumination[i] = 1.0
+    else:
+        # Night side
+        # Distance from center line
+        dist_y = abs(y)
+        penumbra_width = 2500.0 # Widen transition for a smoother, less square curve
+        if dist_y < (R_earth - penumbra_width/2): # Deep Umbra
+            illumination[i] = 0.0
+        elif dist_y > (R_earth + penumbra_width/2): # Clear of shadow
+            illumination[i] = 1.0
+        else:
+            # Penumbra smooth transition
+            illumination[i] = (dist_y - (R_earth - penumbra_width/2)) / penumbra_width
 
-# Temperature model (Tuned to only pass 120C for ~9 minutes)
+# Temperature Model
 temperature = np.zeros_like(time, dtype=float)
-tau = 30 # Slower thermal time constant
-curr_temp = 50.0 # Starts exactly at 50 degrees
+tau = 20.0 # thermal time constant (minutes)
+curr_temp = 25.0 # Initial temp
 
 # Power Consumption Estimates (mA)
-baseline_power = np.full_like(time, 40.1, dtype=float)
+baseline_power = np.full_like(time, 40.0086, dtype=float)
 improved_power = np.zeros_like(time, dtype=float)
 
-overheat_threshold = 120 # degrees C
+overheat_threshold = 95 # degrees C, more realistic limit
 overheat_timer = 0
 is_overheated = False
 
 for i in range(len(time)):
-    # 1. Calculate temperature for this minute
-    # Target temp adjusted to 130 so the peak stays under control
-    target_temp = 130 if not is_eclipse[i] else -40
+    # 1. Thermal Model
+    # Target temp based on illumination
+    target_temp = -40 + (illumination[i] * (100 - (-40))) # Scale from -40 (eclipse) to +100 (sun)
     curr_temp += (target_temp - curr_temp) / tau
     temperature[i] = curr_temp
 
     # 2. Power and Protection Logic
-    if is_eclipse[i]:
-        improved_power[i] = 0.01 # Deep sleep during eclipse
-        # Reset protection flags when it cools down in eclipse
+    if illumination[i] < 0.1: # Deep eclipse
+        improved_power[i] = 0.0111 # Deep sleep during eclipse
         overheat_timer = 0 
         is_overheated = False 
     else:
-        # Check if we are in the danger zone
+        # Check danger zone
         if temperature[i] >= overheat_threshold:
             overheat_timer += 1
         else:
-            overheat_timer = 0 # Reset if it drops below 120
+            overheat_timer = 0
             
-        # If we've been at or above 120 for 5 continuous minutes, trigger protection
         if overheat_timer >= 5:
             is_overheated = True
             
-        # Apply Power Draw
         if is_overheated:
-            improved_power[i] = 0.01 # Deep sleep due to overheating
+            improved_power[i] = 0.0111 # Deep sleep due to overheating
         else:
-            improved_power[i] = 40.1 # Normal operation in safe sunlight
+            improved_power[i] = 40.0086 # Normal operation
 
 # --- 3. Calculate Final Statistics ---
-baseline_energy = np.trapz(baseline_power, time)
-improved_energy = np.trapz(improved_power, time)
+baseline_energy = np.trapezoid(baseline_power, time)
+improved_energy = np.trapezoid(improved_power, time)
 savings = ((baseline_energy - improved_energy) / baseline_energy) * 100
 
 final_textstr = (f"MISSION COMPLETE - 2 ORBITS\n"
@@ -67,90 +93,115 @@ final_textstr = (f"MISSION COMPLETE - 2 ORBITS\n"
                  f"Improved Energy: {improved_energy:.0f} mA·min\n"
                  f"TOTAL POWER SAVED: {savings:.1f}%")
 
+print(final_textstr)
+
 # --- 4. Setup the Animated Figure ---
-fig, axs = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
-fig.canvas.manager.set_window_title('LEO Satellite Power Simulation')
+fig = plt.figure(figsize=(15, 8))
+fig.canvas.manager.set_window_title('Realistic LEO Satellite Power Simulation')
 
-line_env, = axs[0].plot([], [], color='#FFB300', drawstyle="steps-mid", linewidth=2, label="Sunlight (1=Sun, 0=Eclipse)")
-fill_env = None
+# GridSpec Layout
+gs = fig.add_gridspec(3, 2, width_ratios=[1, 1.2])
 
-line_temp, = axs[1].plot([], [], color='#E53935', linewidth=2, label="Satellite Temp (°C)")
-axs[1].axhline(y=overheat_threshold, color='darkred', linestyle='--', label="Overheat Threshold (120°C)")
-fill_temp = None
+# Left: Orbit Animation
+ax_spatial = fig.add_subplot(gs[:, 0])
+ax_spatial.set_aspect('equal')
+ax_spatial.set_xlim(-R_orbit * 1.5, R_orbit * 1.5)
+ax_spatial.set_ylim(-R_orbit * 1.5, R_orbit * 1.5)
+ax_spatial.axis('off')
+ax_spatial.set_title("2D Orbital View")
 
-line_base_power, = axs[2].plot([], [], color='#757575', linestyle='--', linewidth=2, label="Baseline Power")
-line_imp_power, = axs[2].plot([], [], color='#43A047', linewidth=2, label="Improved Power (Smart Sleep)")
-fill_power = None
+# Draw Earth
+earth = Circle((0, 0), R_earth, color='#1f77b4', zorder=2)
+ax_spatial.add_patch(earth)
 
-props = dict(boxstyle='round,pad=0.8', facecolor='#E8F5E9', alpha=0.95, edgecolor='#43A047', linewidth=2)
-summary_text = axs[2].text(0.5, 0.5, "", transform=axs[2].transAxes, fontsize=14, 
-                           fontweight='bold', verticalalignment='center', horizontalalignment='center', 
-                           bbox=props, zorder=10)
-summary_text.set_visible(False)
+# Draw Shadow Cone
+shadow_y = R_earth
+shadow_x = R_orbit * 1.5
+shadow = Polygon([ (0, shadow_y), (-shadow_x, shadow_y), (-shadow_x, -shadow_y), (0, -shadow_y) ], color='black', alpha=0.3, zorder=1)
+ax_spatial.add_patch(shadow)
 
-# Format Axes
-axs[0].set_ylim(-0.2, 1.2)
-axs[0].set_xlim(0, total_time)
-axs[0].set_yticks([0, 1])
-axs[0].set_yticklabels(['Eclipse', 'Sunlight'])
-axs[0].set_ylabel("Illumination")
-axs[0].set_title("Real-Time Simulation: 2 Orbits (Fast Mode: 4 Mins/Sec)")
-axs[0].legend(loc="upper right")
-axs[0].grid(True, alpha=0.5)
+# Draw Orbit Path
+orbit_path = Circle((0, 0), R_orbit, color='gray', linestyle='--', fill=False, zorder=1)
+ax_spatial.add_patch(orbit_path)
 
-axs[1].set_ylim(-45, 140) 
-axs[1].set_ylabel("Temperature (°C)")
-axs[1].legend(loc="lower right")
-axs[1].grid(True, alpha=0.5)
+# Add Sun Direction Arrows
+ax_spatial.annotate('SUN', xy=(R_orbit * 1.2, 0), xytext=(R_orbit * 1.4, 0),
+            arrowprops=dict(facecolor='yellow', shrink=0.05),
+            fontsize=12, fontweight='bold', color='orange', zorder=1)
 
-axs[2].set_ylim(-5, 55) 
-axs[2].set_xlabel("Time (Minutes)")
-axs[2].set_ylabel("Power Consumption (mA)")
-axs[2].legend(loc="upper right")
-axs[2].grid(True, alpha=0.5)
+# Load CubeSat Image
+img_path = os.path.join(os.path.dirname(__file__), '..', 'docs', 'cubesat.png')
+try:
+    sat_img = mpimg.imread(img_path)
+    imagebox = OffsetImage(sat_img, zoom=0.05) # Adjusted zoom down from 0.15 for better scale
+    sat_ab = AnnotationBbox(imagebox, (sat_x[0], sat_y[0]), frameon=False, zorder=5)
+    ax_spatial.add_artist(sat_ab)
+except FileNotFoundError:
+    sat_ab = None
+    sat_marker, = ax_spatial.plot(sat_x[0], sat_y[0], 'ro', markersize=10, zorder=5)
+
+# Right: 3 Graphs
+ax_env = fig.add_subplot(gs[0, 1])
+ax_temp = fig.add_subplot(gs[1, 1], sharex=ax_env)
+ax_pow = fig.add_subplot(gs[2, 1], sharex=ax_env)
+
+line_env, = ax_env.plot([], [], color='#FFB300', linewidth=2, label="Illumination Factor")
+ax_env.set_ylim(-0.1, 1.1)
+ax_env.set_xlim(0, total_time)
+ax_env.set_ylabel("Illumination")
+ax_env.set_title("Real-Time Simulation: Telemetry")
+ax_env.legend(loc="upper right")
+ax_env.grid(True, alpha=0.5)
+
+line_temp, = ax_temp.plot([], [], color='#E53935', linewidth=2, label="Satellite Temp (°C)")
+ax_temp.axhline(y=overheat_threshold, color='darkred', linestyle='--', label=f"Threshold ({overheat_threshold}°C)")
+ax_temp.set_ylim(-50, 110) 
+ax_temp.set_ylabel("Temperature (°C)")
+ax_temp.legend(loc="upper right")
+ax_temp.grid(True, alpha=0.5)
+
+line_base_power, = ax_pow.plot([], [], color='#757575', linestyle='--', linewidth=2, label="Baseline (~40mA)")
+line_imp_power, = ax_pow.plot([], [], color='#43A047', linewidth=2, label="Improved (Smart Sleep)")
+ax_pow.set_ylim(-5, 60) 
+ax_pow.set_xlabel("Time (Minutes)")
+ax_pow.set_ylabel("Power (mA)")
+ax_pow.legend(loc="upper right")
+ax_pow.grid(True, alpha=0.5)
 
 plt.tight_layout()
 
 # --- 5. Animation Function ---
 def animate(frame):
-    global fill_env, fill_temp, fill_power
+    # frame is the index from frame_sequence
+    t_data = time[:frame+1]
     
-    t_data = time[:frame]
-    
-    # 1. Update Environment
-    env_data = ~is_eclipse[:frame]
-    line_env.set_data(t_data, env_data)
-    
-    if fill_env is not None: fill_env.remove()
-    if frame > 0:
-        fill_env = axs[0].fill_between(t_data, 0, env_data, color='#FFB300', alpha=0.2)
-    
-    # 2. Update Temperature
-    temp_data = temperature[:frame]
-    line_temp.set_data(t_data, temp_data)
-    
-    if fill_temp is not None: fill_temp.remove()
-    if frame > 0:
-        fill_temp = axs[1].fill_between(t_data, overheat_threshold, temp_data, 
-                                        where=(temp_data > overheat_threshold), color='red', alpha=0.4)
-    
-    # 3. Update Power
-    line_base_power.set_data(t_data, baseline_power[:frame])
-    imp_power_data = improved_power[:frame]
-    line_imp_power.set_data(t_data, imp_power_data)
-    
-    if fill_power is not None: fill_power.remove()
-    if frame > 0:
-        fill_power = axs[2].fill_between(t_data, 0, imp_power_data, color='#43A047', alpha=0.2)
+    # 1. Update Spatial View
+    if sat_ab is not None:
+        sat_ab.xybox = (sat_x[frame], sat_y[frame])
+    else:
+        sat_marker.set_data([sat_x[frame]], [sat_y[frame]])
+        
+    # 2. Update Graphs
+    line_env.set_data(t_data, illumination[:frame+1])
+    line_temp.set_data(t_data, temperature[:frame+1])
+    line_base_power.set_data(t_data, baseline_power[:frame+1])
+    line_imp_power.set_data(t_data, improved_power[:frame+1])
 
-    # # 4. Final Results Box
-    # if frame == len(time) - 1:
-    #     summary_text.set_text(final_textstr)
-    #     summary_text.set_visible(True)
+    if sat_ab is not None:
+        return sat_ab, line_env, line_temp, line_base_power, line_imp_power
+    else:
+        return sat_marker, line_env, line_temp, line_base_power, line_imp_power
 
-    return line_env, line_temp, line_base_power, line_imp_power, summary_text
+# Use all frames and slow down interval
+frame_sequence = np.arange(0, len(time), 1)
+ani = FuncAnimation(fig, animate, frames=frame_sequence, interval=50, blit=True, repeat=False)
 
-# Set interval=250 for 250ms per frame (4 times faster than before)
-ani = FuncAnimation(fig, animate, frames=len(time), interval=250, repeat=False)
-
-plt.show()
+import matplotlib
+if matplotlib.get_backend().lower() == 'agg' or not matplotlib.is_interactive():
+    gif_path = 'simulation.gif'
+    print(f"Non-interactive backend detected. Saving animation to '{gif_path}'...")
+    # FPS = 15 for slower playback
+    ani.save(gif_path, writer='pillow', fps=15)
+    print(f"Animation saved successfully to '{gif_path}'.")
+else:
+    plt.show()
