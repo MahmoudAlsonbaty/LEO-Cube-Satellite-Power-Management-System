@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="96" y="44" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#111827">Cold Long-Eclipse Stress Year Heater Energy</text>
+<text x="96" y="72" font-family="Arial, sans-serif" font-size="15" fill="#4b5563">Projected heater energy (kWh)</text>
+<line x1="96" y1="508.0" x2="1058" y2="508.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="84" y="513.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">0.00</text>
+<line x1="96" y1="404.0" x2="1058" y2="404.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="84" y="409.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">1.22</text>
+<line x1="96" y1="300.0" x2="1058" y2="300.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="84" y="305.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">2.44</text>
+<line x1="96" y1="196.0" x2="1058" y2="196.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="84" y="201.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">3.66</text>
+<line x1="96" y1="92.0" x2="1058" y2="92.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="84" y="97.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">4.89</text>
+<rect x="158.9" y="461.6" width="58.0" height="46.4" rx="4" fill="#6b7280"/>
+<text x="187.9" y="455.6" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#374151">0.54</text>
+<rect x="227.3" y="433.7" width="58.0" height="74.3" rx="4" fill="#3b82f6"/>
+<text x="256.3" y="427.7" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#374151">0.87</text>
+<rect x="295.8" y="498.1" width="58.0" height="9.9" rx="4" fill="#10b981"/>
+<text x="324.8" y="492.1" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#374151">0.12</text>
+<text x="256.3" y="548" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#111827">1 year</text>
+<rect x="479.6" y="368.9" width="58.0" height="139.1" rx="4" fill="#6b7280"/>
+<text x="508.6" y="362.9" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#374151">1.63</text>
+<rect x="548.0" y="285.1" width="58.0" height="222.9" rx="4" fill="#3b82f6"/>
+<text x="577.0" y="279.1" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#374151">2.62</text>
+<rect x="616.4" y="478.4" width="58.0" height="29.6" rx="4" fill="#10b981"/>
+<text x="645.4" y="472.4" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#374151">0.35</text>
+<text x="577.0" y="548" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#111827">3 year</text>
+<rect x="800.2" y="276.2" width="58.0" height="231.8" rx="4" fill="#6b7280"/>
+<text x="829.2" y="270.2" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#374151">2.72</text>
+<rect x="868.7" y="136.6" width="58.0" height="371.4" rx="4" fill="#3b82f6"/>
+<text x="897.7" y="130.6" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#374151">4.36</text>
+<rect x="937.1" y="458.7" width="58.0" height="49.3" rx="4" fill="#10b981"/>
+<text x="966.1" y="452.7" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#374151">0.58</text>
+<text x="897.7" y="548" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#111827">5 year</text>
+<rect x="96" y="572" width="16" height="16" rx="3" fill="#6b7280"/>
+<text x="120" y="585" font-family="Arial, sans-serif" font-size="13" fill="#374151">No temp gate</text>
+<rect x="381" y="572" width="16" height="16" rx="3" fill="#3b82f6"/>
+<text x="405" y="585" font-family="Arial, sans-serif" font-size="13" fill="#374151">Quetzal-style protected</text>
+<rect x="666" y="572" width="16" height="16" rx="3" fill="#10b981"/>
+<text x="690" y="585" font-family="Arial, sans-serif" font-size="13" fill="#374151">Our adaptive</text>
+</svg>

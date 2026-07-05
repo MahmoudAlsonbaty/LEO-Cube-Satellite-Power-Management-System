@@ -1,0 +1,5 @@
+# Final analytical model dependency.
+#
+# The core simulation uses only the Python standard library. Pillow is optional
+# but recommended because it lets the model write PNG charts in addition to SVG.
+Pillow>=10.0.0

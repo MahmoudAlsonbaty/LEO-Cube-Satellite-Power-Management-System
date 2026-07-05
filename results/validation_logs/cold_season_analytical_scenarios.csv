@@ -1,0 +1,4 @@
+scenario,duration_days,orbit_min,eclipse_min,initial_soc_pct,initial_battery_temp_c,sun_temp_c,eclipse_temp_c,note
+warm_nominal_year,365.25,94.469,31.5,88.0,12.0,30.0,-10.0,"One full nominal year. This is the control case: same spacecraft, orbit, battery, solar input, and starting state as the cold-season models, without the colder seasonal block."
+realistic_cold_season_year,365.25,94.469,31.5,88.0,12.0,30.0,-10.0,"One full year with the same nominal conditions except for two 45-day cold-season windows. Each window has 5 transition days, 35 consecutive low-beta cold days with 36 min eclipses, then 5 recovery days."
+cold_long_eclipse_stress_year,365.25,94.469,31.5,88.0,12.0,30.0,-10.0,One full year with the same nominal conditions except for two 45-day analytical stress windows using repeated 41.5 min cold eclipses at 22 C sunlight and -20 C eclipse.
